@@ -2,8 +2,8 @@
 /*
 Plugin Name: CSV Importer
 Description: Import data as posts from a CSV file. <em>You can reach the author at <a href="mailto:d.v.kobozev@gmail.com">d.v.kobozev@gmail.com</a></em>.
-Version: 0.3.7
-Author: Denis Kobozev
+Version: 0.4.0
+Author: Denis Kobozev, Bryan Headrick
 */
 
 /**
@@ -47,6 +47,7 @@ class CSVImporterPlugin {
         'csv_post_author'     => null,
         'csv_post_slug'       => null,
         'csv_post_parent'     => 0,
+        
     );
 
     var $log = array();
@@ -117,16 +118,46 @@ class CSVImporterPlugin {
         <input name="_csv_importer_import_as_draft" type="hidden" value="publish" />
         <label><input name="csv_importer_import_as_draft" type="checkbox" <?php if ('draft' == $opt_draft) { echo 'checked="checked"'; } ?> value="draft" /> Import posts as drafts</label>
         </p>
-
-        <!-- Parent category -->
-        <p>Organize into category <?php wp_dropdown_categories(array('show_option_all' => 'Select one ...', 'hide_empty' => 0, 'hierarchical' => 1, 'show_count' => 0, 'name' => 'csv_importer_cat', 'orderby' => 'name', 'selected' => $opt_cat));?><br/>
-            <small>This will create new categories inside the category parent you choose.</small></p>
-
         <!-- File input -->
         <p><label for="csv_import">Upload file:</label><br/>
             <input name="csv_import" id="csv_import" type="file" value="" aria-required="true" /></p>
         <p class="submit"><input type="submit" class="button" name="submit" value="Import" /></p>
     </form>
+    <h2>Standard Fields</h2>
+ <ul>
+    <li><strong>csv_post_title</strong></li>
+	<li>csv_post_post</li>
+	<li>csv_post_type</li>
+	<li>csv_post_excerpt</li>
+	<li>csv_post_date</li>
+	<li>csv_post_tags</li>
+	<li>csv_post_categories</li>
+	<li>csv_post_author</li>
+	<li>csv_post_slug</li>
+	<li>csv_post_parent</li>
+	
+</ul>
+   <h2>== Custom taxonomies ==</h2>
+<p>Once custom taxonomies are set up in your theme&#8217;s functions.php file or</p>
+<p>by using a 3rd party plugin, `<strong>csv_ctax_(taxonomy name)</strong>` columns can be<br />
+used to assign imported data to the taxonomies.</p>
+<h3>__Non-hierarchical taxonomies__</h3>
+<p>The syntax for non-hierarchical taxonomies is straightforward and is essentially<br />
+the same as the `csv_post_tags` syntax.</p>
+<h3>__Hierarchical taxonomies__</h3>
+<p>The syntax for hierarchical taxonomies is more complicated. Each hierarchical<br />
+taxonomy field is a tiny two-column CSV file, where _the order of columns<br />
+matters_. The first column contains the name of the parent term and the second<br />
+column contains the name of the child term. Top level terms have to be preceded<br />
+either by an empty string or a 0 (zero). (precede each value with a comma)</p>
+<p>.</p>
+<h2>== Attachments --</h2>
+ <p>You can now add attachments by uploading the files via ftp and then including</p>
+<p>the full URL to the attachment file including images, documents or any other file type</p>
+<p>that WordPress supports. The format is &lt;strong&gt;csv_attachment_(attachment name)&lt;/strong&gt;.</p>
+<p>Also, if the column name is csv_attachment_thumbnail, then the attachment will be set as</p>
+<p>the post&#8217;s featured image.</p>
+    
 </div><!-- end wrap -->
 
 <?php
@@ -218,6 +249,7 @@ class CSVImporterPlugin {
                 $imported++;
                 $comments += $this->add_comments($post_id, $csv_data);
                 $this->create_custom_fields($post_id, $csv_data);
+                $this->add_attachments($post_id,$csv_data);
             } else {
                 $skipped++;
             }
@@ -260,6 +292,7 @@ class CSVImporterPlugin {
             'post_author'  => $this->get_auth_id($data['csv_post_author']),
             'tax_input'    => $this->get_taxonomies($data),
             'post_parent'  => $data['csv_post_parent'],
+            
         );
 
         // pages don't have tags or categories
@@ -285,7 +318,25 @@ class CSVImporterPlugin {
         }
         return $id;
     }
-
+    /**
+     * Return id of first image that matches the passed filename
+     * @param string $filename csv_post_image cell contents
+     * 
+     */
+function get_image_id($filename){
+    //try searching titles first
+    $filename =  preg_replace('/\.[^.]*$/', '', $filename);
+    $results = get_page_by_title($filename, ARRAY_A, 'attachment');
+    if(count($results==1)) return $results[0]->ID;
+    elseif(count($results>1)) {
+        foreach($results as $result){
+        if(strpos($result->guid,$filename))
+                return $result->ID;
+        }
+    }
+    
+    
+}
     /**
      * Return an array of category ids for a post.
      *
@@ -370,7 +421,61 @@ class CSVImporterPlugin {
         }
         return $taxonomies;
     }
+function add_attachments($post_id, $data){
+   // $this->log['notice'][]= 'adding attachments for id#'. $post_id;
+    $attachments = array();
+    foreach ($data as $k => $v) {
+            if (preg_match('/^csv_attachment_(.*)$/', $k, $matches)) {
+               // $this->log['notice'][] = 'Found this attachment: ' . $matches[1] . ' with this value:' . $data[$k];
+                $a_name = $matches[1];
+               
+                    $attachment[$a_name] = $data[$k];
+                    $url =  preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $data[$k]);
+                    if(strlen(trim($url))>0) {
+                        $id = $this->download_attachment($data[$k],$post_id,$a_name);}
+                    if($a_name == 'thumbnail'){
+                        add_post_meta($post_id, '_thumbnail_id',$id);
+                    }
+            }
+        } 
+        return $attachments;
+}
 
+function download_attachment($url, $post_id, $desc){
+    
+    $tmp = download_url( $url );
+	 if(strlen(trim($url))<5) return;
+	
+	// Set variables for storage
+	// fix file filename for query strings
+	//preg_match('/[^\?]+\.(jpg|JPG|jpe|JPE|jpeg|JPEG|gif|GIF|png|PNG|wav|mp3|pdf)/', $file, $matches);
+	 $file_array = array(
+        'name' => basename( $url ),
+        'tmp_name' => $tmp
+             );
+
+
+	// If error storing temporarily, unlink
+	if ( is_wp_error( $tmp ) ) {
+		@unlink($file_array['tmp_name']);
+		$file_array['tmp_name'] = '';
+	}
+
+	// do the validation and storage stuff
+	$id = media_handle_sideload( $file_array, $post_id, $desc );
+        
+	// If error storing permanently, unlink
+	if ( is_wp_error($id) ) {
+             $this->log['error'][] = $id->get_error_message() .' : ' . $url;
+		@unlink($file_array['tmp_name']);
+		return $id;
+	}
+         //$this->log['notice'][] = 'Downloaded the file. Here\'s the id: ' . $id;
+
+	$src = wp_get_attachment_url( $id );
+         //$this->log['notice'][] = 'Saved the file successfully! Here\'s the path: ' . $src ;
+    return $id;
+}
     /**
      * Return an array of term IDs for hierarchical taxonomies or the original
      * string from CSV for non-hierarchical taxonomies. The original string
@@ -543,6 +648,7 @@ class CSVImporterPlugin {
                 add_post_meta($post_id, $k, $v);
             }
         }
+        
     }
 
     function get_auth_id($author) {
