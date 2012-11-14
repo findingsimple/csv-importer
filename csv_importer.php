@@ -2,8 +2,8 @@
 /*
 Plugin Name: CSV Importer
 Description: Import data as posts from a CSV file. <em>You can reach the author at <a href="mailto:d.v.kobozev@gmail.com">d.v.kobozev@gmail.com</a></em>.
-Version: 0.4.0
-Author: Denis Kobozev, Bryan Headrick
+Version: 0.3.7
+Author: Denis Kobozev
 */
 
 /**
@@ -125,7 +125,7 @@ class CSVImporterPlugin {
     </form>
     <h2>Standard Fields</h2>
  <ul>
-    <li><strong>csv_post_title</strong></li>
+	<li><strong>csv_post_title</strong></li>
 	<li>csv_post_post</li>
 	<li>csv_post_type</li>
 	<li>csv_post_excerpt</li>
@@ -135,6 +135,7 @@ class CSVImporterPlugin {
 	<li>csv_post_author</li>
 	<li>csv_post_slug</li>
 	<li>csv_post_parent</li>
+        <li>csv_post_image</li>
 	
 </ul>
    <h2>== Custom taxonomies ==</h2>
@@ -244,7 +245,9 @@ either by an empty string or a 0 (zero). (precede each value with a comma)</p>
         $skipped = 0;
         $imported = 0;
         $comments = 0;
+        
         foreach ($csv->connect() as $csv_data) {
+         set_time_limit(30);
             if ($post_id = $this->create_post($csv_data, $options)) {
                 $imported++;
                 $comments += $this->add_comments($post_id, $csv_data);
@@ -326,9 +329,13 @@ either by an empty string or a 0 (zero). (precede each value with a comma)</p>
 function get_image_id($filename){
     //try searching titles first
     $filename =  preg_replace('/\.[^.]*$/', '', $filename);
-    $results = get_page_by_title($filename, ARRAY_A, 'attachment');
-    if(count($results==1)) return $results[0]->ID;
-    elseif(count($results>1)) {
+     $filename = strtolower(str_replace(' ','-',$filename));
+     $args = array('post_type' => 'attachment','name'=>$filename,'post_status'=>'publish');
+    $results = get_posts($args);
+    //$results = get_page_by_title($filename, ARRAY_A, 'attachment');
+    if(count($results==0)) return;
+     if(count($results)==1) return $results[0]->ID;
+    elseif(count($results)>1) {
         foreach($results as $result){
         if(strpos($result->guid,$filename))
                 return $result->ID;
@@ -421,6 +428,13 @@ function get_image_id($filename){
         }
         return $taxonomies;
     }
+     /**
+     * Parse attachment data from the file
+     *
+     * @param int   $post_id
+     * @param array $data
+     * @return array
+     */
 function add_attachments($post_id, $data){
    // $this->log['notice'][]= 'adding attachments for id#'. $post_id;
     $attachments = array();
@@ -430,17 +444,30 @@ function add_attachments($post_id, $data){
                 $a_name = $matches[1];
                
                     $attachment[$a_name] = $data[$k];
-                    $url =  preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $data[$k]);
-                    if(strlen(trim($url))>0) {
+                   
+                    if(preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $data[$k])) {
+                        $url = $v;
                         $id = $this->download_attachment($data[$k],$post_id,$a_name);}
-                    if($a_name == 'thumbnail'){
+                    if($a_name == 'thumbnail' && $id<>''){
                         add_post_meta($post_id, '_thumbnail_id',$id);
                     }
+            }
+            else if($k=='csv_post_image'){
+                $id = $this->get_image_id($v);
+                if($id<>'') add_post_meta($post_id, '_thumbnail_id',$this->get_image_id($v));
             }
         } 
         return $attachments;
 }
-
+/**
+     * Download file from remote URL, save it to the Media Library, and return
+     * the attachment id
+     *
+     * @param string $url
+     * @param int  $post_id
+     * @param string $desc
+     * @return int
+     */
 function download_attachment($url, $post_id, $desc){
     
     $tmp = download_url( $url );
