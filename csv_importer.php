@@ -5,7 +5,6 @@ Description: Import data as posts from a CSV file. <em>You can reach the author 
 Version: 0.3.8
 Author: Denis Kobozev, Bryan Headrick
 */
-
 /**
  * LICENSE: The MIT License {{{
  *
@@ -135,7 +134,7 @@ class CSVImporterPlugin {
 	<li>csv_post_author</li>
 	<li>csv_post_slug</li>
 	<li>csv_post_parent</li>
-        <li>csv_post_image</li>
+       
 	
 </ul>
    <h2>== Custom taxonomies ==</h2>
