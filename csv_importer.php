@@ -2,8 +2,8 @@
 /*
 Plugin Name: CSV Importer
 Description: Import data as posts from a CSV file. <em>You can reach the author at <a href="mailto:d.v.kobozev@gmail.com">d.v.kobozev@gmail.com</a></em>.
-Version: 0.3.7
-Author: Denis Kobozev
+Version: 0.3.8
+Author: Denis Kobozev, Bryan Headrick
 */
 
 /**
@@ -247,7 +247,7 @@ either by an empty string or a 0 (zero). (precede each value with a comma)</p>
         $comments = 0;
         
         foreach ($csv->connect() as $csv_data) {
-         set_time_limit(30);
+        
             if ($post_id = $this->create_post($csv_data, $options)) {
                 $imported++;
                 $comments += $this->add_comments($post_id, $csv_data);
@@ -469,7 +469,7 @@ function add_attachments($post_id, $data){
      * @return int
      */
 function download_attachment($url, $post_id, $desc){
-    
+     set_time_limit(10);
     $tmp = download_url( $url );
 	 if(strlen(trim($url))<5) return;
 	
@@ -672,6 +672,11 @@ function download_attachment($url, $post_id, $desc){
         foreach ($data as $k => $v) {
             // anything that doesn't start with csv_ is a custom field
             if (!preg_match('/^csv_/', $k) && $v != '') {
+                 // if value is serialized unserialize it
+            if( is_serialized($v) ) {
+                $v = unserialize($v);
+                // the unserialized array will be re-serialized with add_post_meta()
+            }
                 add_post_meta($post_id, $k, $v);
             }
         }
@@ -682,7 +687,7 @@ function download_attachment($url, $post_id, $desc){
         if (is_numeric($author)) {
             return $author;
         }
-        $author_data = get_userdatabylogin($author);
+        $author_data = get_user_by('login', $author);
         return ($author_data) ? $author_data->ID : 0;
     }
 
