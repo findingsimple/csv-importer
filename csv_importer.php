@@ -2,7 +2,7 @@
 /*
 Plugin Name: CSV Importer
 Description: Import data as posts from a CSV file. <em>You can reach the author at <a href="mailto:d.v.kobozev@gmail.com">d.v.kobozev@gmail.com</a></em>.
-Version: 0.3.8
+Version: 0.3.9
 Author: Denis Kobozev, Bryan Headrick
 */
 /**
@@ -151,13 +151,21 @@ matters_. The first column contains the name of the parent term and the second<b
 column contains the name of the child term. Top level terms have to be preceded<br />
 either by an empty string or a 0 (zero). (precede each value with a comma)</p>
 <p>.</p>
-<h2>== Attachments --</h2>
+<h2>== Attachments ==</h2>
  <p>You can now add attachments by uploading the files via ftp and then including</p>
 <p>the full URL to the attachment file including images, documents or any other file type</p>
-<p>that WordPress supports. The format is &lt;strong&gt;csv_attachment_(attachment name)&lt;/strong&gt;.</p>
+<p>that WordPress supports. The format is <strong>csv_attachment_(attachment name)</strong>.</p>
 <p>Also, if the column name is csv_attachment_thumbnail, then the attachment will be set as</p>
 <p>the post&#8217;s featured image.</p>
+<h2>== Custom/Meta Fields</h2>
+All columns not beginning with <strong>csv_</strong> will be imported as postmeta
+<h2>== Serialized Data Support ==</h2>
+<p>Now supports serializing data. Format meta field as follows:</p>
+<p><strong>    key::value </strong></p>
+<p>    or</p>
+<p><strong>    key::value[]key::value</strong>...
     
+</p>
 </div><!-- end wrap -->
 
 <?php
@@ -675,6 +683,17 @@ function download_attachment($url, $post_id, $desc){
             if( is_serialized($v) ) {
                 $v = unserialize($v);
                 // the unserialized array will be re-serialized with add_post_meta()
+            }elseif(strpos($v,'::')){
+                // import data and serialize it formatted as
+                // key::value[]key::value
+                $array = explode("[]",$v);
+                
+                foreach ($array as $lineNum => $line)
+{
+list($key, $value) = explode("::", $line);
+$newArray[$key] = $value;
+}
+$v = $newArray;
             }
                 add_post_meta($post_id, $k, $v);
             }
