@@ -330,10 +330,10 @@ function get_image_id($filename){
     //try searching titles first
     $filename =  preg_replace('/\.[^.]*$/', '', $filename);
      $filename = strtolower(str_replace(' ','-',$filename));
-     $args = array('post_type' => 'attachment','name'=>$filename,'post_status'=>'publish');
+     $args = array('post_type' => 'attachment','name'=>$filename);
     $results = get_posts($args);
     //$results = get_page_by_title($filename, ARRAY_A, 'attachment');
-    if(count($results==0)) return;
+    if(count($results)==0) return;
      if(count($results)==1) return $results[0]->ID;
     elseif(count($results)>1) {
         foreach($results as $result){
