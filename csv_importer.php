@@ -110,62 +110,55 @@ class CSVImporterPlugin {
 ?>
 
 <div class="wrap">
-    <h2>Import CSV</h2>
-    <form class="add:the-list: validate" method="post" enctype="multipart/form-data">
-        <!-- Import as draft -->
-        <p>
-        <input name="_csv_importer_import_as_draft" type="hidden" value="publish" />
-        <label><input name="csv_importer_import_as_draft" type="checkbox" <?php if ('draft' == $opt_draft) { echo 'checked="checked"'; } ?> value="draft" /> Import posts as drafts</label>
-        </p>
-        <!-- File input -->
-        <p><label for="csv_import">Upload file:</label><br/>
-            <input name="csv_import" id="csv_import" type="file" value="" aria-required="true" /></p>
-        <p class="submit"><input type="submit" class="button" name="submit" value="Import" /></p>
-    </form>
-    <h2>Standard Fields</h2>
- <ul>
-	<li><strong>csv_post_title</strong></li>
-	<li>csv_post_post</li>
-	<li>csv_post_type</li>
-	<li>csv_post_excerpt</li>
-	<li>csv_post_date</li>
-	<li>csv_post_tags</li>
-	<li>csv_post_categories</li>
-	<li>csv_post_author</li>
-	<li>csv_post_slug</li>
-	<li>csv_post_parent</li>
-       
-	
-</ul>
-   <h2>== Custom taxonomies ==</h2>
-<p>Once custom taxonomies are set up in your theme&#8217;s functions.php file or</p>
-<p>by using a 3rd party plugin, `<strong>csv_ctax_(taxonomy name)</strong>` columns can be<br />
-used to assign imported data to the taxonomies.</p>
-<h3>__Non-hierarchical taxonomies__</h3>
-<p>The syntax for non-hierarchical taxonomies is straightforward and is essentially<br />
-the same as the `csv_post_tags` syntax.</p>
-<h3>__Hierarchical taxonomies__</h3>
-<p>The syntax for hierarchical taxonomies is more complicated. Each hierarchical<br />
-taxonomy field is a tiny two-column CSV file, where _the order of columns<br />
-matters_. The first column contains the name of the parent term and the second<br />
-column contains the name of the child term. Top level terms have to be preceded<br />
-either by an empty string or a 0 (zero). (precede each value with a comma)</p>
-<p>.</p>
-<h2>== Attachments ==</h2>
- <p>You can now add attachments by uploading the files via ftp and then including</p>
-<p>the full URL to the attachment file including images, documents or any other file type</p>
-<p>that WordPress supports. The format is <strong>csv_attachment_(attachment name)</strong>.</p>
-<p>Also, if the column name is csv_attachment_thumbnail, then the attachment will be set as</p>
-<p>the post&#8217;s featured image.</p>
-<h2>== Custom/Meta Fields</h2>
-All columns not beginning with <strong>csv_</strong> will be imported as postmeta
-<h2>== Serialized Data Support ==</h2>
-<p>Now supports serializing data. Format meta field as follows:</p>
-<p><strong>    key::value </strong></p>
-<p>    or</p>
-<p><strong>    key::value[]key::value</strong>...
-    
-</p>
+	<h2>Import CSV</h2>
+	<form class="add:the-list: validate" method="post" enctype="multipart/form-data">
+		<!-- Import as draft -->
+		<p>
+			<input name="_csv_importer_import_as_draft" type="hidden" value="publish" />
+			<label><input name="csv_importer_import_as_draft" type="checkbox" <?php if ('draft' == $opt_draft) { echo 'checked="checked"'; } ?> value="draft" /> Import posts as drafts</label>
+		</p>
+		<!-- File input -->
+		<p><label for="csv_import">Upload file:</label><br/>
+			<input name="csv_import" id="csv_import" type="file" value="" aria-required="true" /></p>
+			<p class="submit"><input type="submit" class="button" name="submit" value="Import" /></p>
+	</form>
+	<h2>Standard Fields</h2>
+	<ul>
+		<li><code>csv_post_title</code></li>
+		<li><code>csv_post_post</code></li>
+		<li><code>csv_post_type</code></li>
+		<li><code>csv_post_excerpt</code></li>
+		<li><code>csv_post_date</code></li>
+		<li><code>csv_post_tags</code></li>
+		<li><code>csv_post_categories</code></li>
+		<li><code>csv_ctax_{taxonomy_name}</code></li>
+		<li><code>csv_post_author</code></li>
+		<li><code>csv_post_slug</code></li>
+		<li><code>csv_post_parent</code></li>
+		<li><code>csv_attachment_{attachment_name}</code></li>
+		<li><code>csv_attachment_thumbnail</code></li>
+	</ul>
+	<h2>Custom taxonomies</h2>
+	<p>Once custom taxonomies are set up in your theme's functions.php file or by using a 3rd party plugin, <code>csv_ctax_{taxonomy_name}</code> columns can be used to assign imported data to the taxonomies.</p>
+
+	<h3>Non-hierarchical Taxonomies</h3>
+	<p>The syntax for non-hierarchical taxonomies is straightforward and is essentially the same as the <code>csv_post_tags</code> syntax.</p>
+
+	<h3>Hierarchical taxonomies</h3>
+	<p>The syntax for hierarchical taxonomies is more complicated. Each hierarchical taxonomy field is a tiny two-column CSV file, where <em>the order of columns matters</em>. The first column contains the name of the parent term and the second column contains the name of the child term. Top level terms have to be preceded either by an empty string or a 0 (zero). (precede each value with a comma).</p>
+
+	<h2>Attachments</h2>
+	<p>You can now add attachments by uploading the files via ftp and then including the full URL to the attachment file including images, documents or any other file type that WordPress supports. The format is <code>csv_attachment_{attachment_name}</code>.</p>
+	<p>Also, if the column name is <code>csv_attachment_thumbnail</code>, then the attachment will be set as the post's featured image.</p>
+
+	<h2>Custom/Meta Fields</h2>
+	<p>All columns not beginning with <strong>csv_</strong> will be imported as postmeta</p>
+
+	<h2>Serialized Data Support</h2>
+	<p>Now supports serializing data. Format meta field as follows:</p>
+	<pre>key::value </pre>
+	<p>or</p>
+	<pre>key::value[]key::value</pre>
 </div><!-- end wrap -->
 
 <?php
