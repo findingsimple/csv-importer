@@ -60,29 +60,12 @@ that comprises a post.
 *   `csv_post_title` - title of the post
 *   `csv_post_post` - body of the post
 *   `csv_post_type` - `post`, `page` or a custom post type.
-    __New in version 0.3.2__
-    In prior versions, importing rows as pages could be specified on a
-    per-file basis using the plugins UI. In 0.3.2, `csv_post_type` column
-    was added to support custom post types as well.
-    Refer to the WordPress
-    [documentation on custom post types][custom_post_types] for more info
-    on how to set up custom post types.
 *   `csv_post_excerpt` - post excerpt
-*   `csv_post_categories` - a comma separated list of category names or ids.
-    __New in version 0.3.5__
-    It's also possible to assign posts to non-existing subcategories, using
-    &gt; to denote category relationships, e.g. `Animalia > Chordata > Mammalia`.
-    If any of the categories in the chain does not exist, the plugin will
-    automatically create it. It's also possible to specify the parent category
-    using an id, as in `42 > Primates > Callitrichidae`, where `42` is an
-    existing category id.
+*   `csv_post_categories` - a comma separated list of category names or ids. It's also possible to assign posts to non-existing subcategories, using &gt; to denote category relationships, e.g. `Animalia > Chordata > Mammalia`. It's also possible to specify the parent category using an id, as in `42 > Primates > Callitrichidae`, where `42` is an existing category id.
 *   `csv_post_tags` - a comma separated list of tags.
 *   `csv_post_date` - about any English textual description of a date and time.
-    For example, `now`, `11/16/2009 0:00`, `1999-12-31 23:55:00`, `+1 week`,
-    `next Thursday`, `last year` are all valid descriptions. For technical
-    details, consult PHP's `strtotime()` function [documentation][strtotime].
-*   `csv_ctax_{taxonomy_name}` - for a custom taxonomy
-*   `csv_attachment_{attachment_name}` - to import an attachment
+*   `csv_ctax_{taxonomy_name}` - for a custom taxonomy. The syntax for non-hierarchical taxonomies is straightforward and is essentially the same as the `csv_post_tags` syntax. The syntax for hierarchical taxonomies is more complicated. Each hierarchical taxonomy field is a tiny two-column CSV file, where <em>the order of columns matters</em>. The first column contains the name of the parent term and the second column contains the name of the child term. Top level terms have to be preceded either by an empty string or a 0 (zero). (precede each value with a comma).
+*   `csv_attachment_{attachment_name}` - to import an attachment. Upload the files via ftp and then including the full URL to the attachment file including images, documents or any other file type that WordPress supports
 *   `csv_attachment_thumbnail` - to import an attachment as a featured image
 
 [custom_post_types]: http://codex.wordpress.org/Custom_Post_Types
