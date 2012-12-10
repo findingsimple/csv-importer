@@ -218,6 +218,7 @@ class CSVImporterPlugin {
             return;
         }
 
+        set_time_limit(120);
         require_once 'File_CSV_DataSource/DataSource.php';
 
         $time_start = microtime(true);
