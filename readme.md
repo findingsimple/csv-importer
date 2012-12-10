@@ -216,7 +216,7 @@ It was inspired by JayBlogger's [CSV Import](http://www.jayblogger.com/the-birth
 
 Contributors:
 
-*   [Bryan Headrick](https://github.com/BHEADRICK/)
+*   [Bryan Headrick](https://github.com/BHEADRICK/) (custom taxonomy & attachment support)
 *   Kevin Hagerty (post_author support)
 *   Edir Pedro (root category option and tableless HTML markup)
 *   Frank Loeffler (comments support)
