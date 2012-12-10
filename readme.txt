@@ -81,6 +81,9 @@ that comprises a post.
     For example, `now`, `11/16/2009 0:00`, `1999-12-31 23:55:00`, `+1 week`,
     `next Thursday`, `last year` are all valid descriptions. For technical
     details, consult PHP's `strtotime()` function [documentation][strtotime].
+*   `csv_ctax_{taxonomy_name}` - for a custom taxonomy
+*   `csv_attachment_{attachment_name}` - to import an attachment
+*   `csv_attachment_thumbnail` - to import an attachment as a featured image
 
 [custom_post_types]: http://codex.wordpress.org/Custom_Post_Types
 [strtotime]: http://php.net/manual/en/function.strtotime.php
